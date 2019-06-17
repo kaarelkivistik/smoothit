@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 export const fetchFromCatalogApi = (path, options) => myFetch(`/catalogapi/api${path}`, options);
 export const fetchFromOrderApi = (path, options) => myFetch(`/orderapi/api${path}`, options);
 
@@ -8,3 +10,13 @@ const myFetch = (...args) =>
 
 const isOk = response => (response.ok ? response : Promise.reject(response));
 const toJson = response => response.json();
+
+export const usePromise = (methodThatReturnsAPromise, initialValue) => {
+  const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    methodThatReturnsAPromise().then(setValue);
+  }, [methodThatReturnsAPromise]);
+
+  return value;
+};

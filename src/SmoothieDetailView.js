@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { fetchFromCatalogApi } from "./shared";
+import React, { useCallback } from "react";
+import { fetchFromCatalogApi, usePromise } from "./shared";
 
 const SmoothieDetailView = ({ smoothieId }) => {
-  const [smoothie, setSmoothie] = useState();
-
-  useEffect(() => {
-    getSmoothie(smoothieId).then(response => setSmoothie(response));
-  }, [smoothieId]);
+  const getActiveSmoothie = useCallback(() => getSmoothie(smoothieId), [smoothieId]);
+  const smoothie = usePromise(getActiveSmoothie);
 
   return <pre>{JSON.stringify(smoothie, null, 2)}</pre>;
 };

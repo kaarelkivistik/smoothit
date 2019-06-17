@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
+import { BrowserRouter, NavLink, Route } from "react-router-dom";
 import { fetchFromCatalogApi, usePromise } from "./shared";
 import SmoothieDetailView from "./SmoothieDetailView";
 
@@ -6,36 +7,31 @@ const App = () => {
   const getSmoothiesContent = useCallback(() => getSmoothies().then(response => response.content), []);
   const smoothies = usePromise(getSmoothiesContent, []);
 
-  const [selectedSmoothieId, setSelectedSmoothieId] = useState(null);
-  const clearSelectedSmoothieId = useCallback(() => setSelectedSmoothieId(null), []);
-
   return (
-    <>
-      <ul>
-        {smoothies.map(smoothie => (
-          <SmoothieListItem
-            key={smoothie.id}
-            smoothie={smoothie}
-            isActive={selectedSmoothieId === smoothie.id}
-            onClick={setSelectedSmoothieId}
-          />
-        ))}
-      </ul>
+    <BrowserRouter>
+      <>
+        <ul>
+          {smoothies.map(smoothie => (
+            <SmoothieListItem key={smoothie.id} smoothie={smoothie} />
+          ))}
+        </ul>
 
-      <hr />
+        <hr />
 
-      {selectedSmoothieId !== null && (
-        <SmoothieDetailView smoothieId={selectedSmoothieId} onClose={clearSelectedSmoothieId} />
-      )}
-    </>
+        <Route
+          path="/smoothies/:smoothieId"
+          render={props => <SmoothieDetailView smoothieId={Number(props.match.params.smoothieId)} />}
+        />
+      </>
+    </BrowserRouter>
   );
 };
 
 const getSmoothies = () => fetchFromCatalogApi("/smoothies");
 
-const SmoothieListItem = ({ smoothie, isActive, onClick }) => (
-  <li style={{ cursor: "pointer", fontWeight: isActive ? "bold" : "normal" }} onClick={() => onClick(smoothie.id)}>
-    {smoothie.name}
+const SmoothieListItem = ({ smoothie }) => (
+  <li>
+    <NavLink to={`/smoothies/${smoothie.id}`}>{smoothie.name}</NavLink>
   </li>
 );
 

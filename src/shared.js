@@ -3,8 +3,15 @@ import { useEffect, useState } from "react";
 export const fetchFromCatalogApi = (path, options) => myFetch(`/catalogapi/api${path}`, options);
 export const fetchFromOrderApi = (path, options) => myFetch(`/orderapi/api${path}`, options);
 
-const myFetch = (...args) =>
-  fetch(...args)
+const myFetch = (path, { body, headers = {}, ...options } = {}) =>
+  fetch(path, {
+    headers: {
+      "content-type": body && "application/json",
+      ...headers
+    },
+    body: body && JSON.stringify(body),
+    ...options
+  })
     .then(isOk)
     .then(toJson);
 

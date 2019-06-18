@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { Switch } from "react-router";
 import { BrowserRouter, NavLink, Route } from "react-router-dom";
+import NewSmoothieView from "./NewSmoothieView";
 import { fetchFromCatalogApi, usePromise } from "./shared";
 import SmoothieDetailView from "./SmoothieDetailView";
 
@@ -21,6 +22,7 @@ const App = () => {
         <hr />
 
         <Switch>
+          <Route path="/smoothies/new" component={NewSmoothieView} />
           <Route path="/smoothies/:smoothieId" component={SmoothieDetailRoute} />
         </Switch>
       </>
@@ -33,6 +35,14 @@ const getSmoothies = () => fetchFromCatalogApi("/smoothies");
 const SmoothieListItem = ({ smoothie }) => (
   <li>
     <NavLink to={`/smoothies/${smoothie.id}`}>{smoothie.name}</NavLink>
+  </li>
+);
+
+const NewSmoothieListItem = () => (
+  <li>
+    <NavLink to="/smoothies/new">
+      <i>Create a smoothie</i>
+    </NavLink>
   </li>
 );
 

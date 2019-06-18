@@ -15,8 +15,7 @@ const getSmoothie = id => fetchFromCatalogApi(`/smoothies/${id}`);
 const updateSmoothie = smoothie =>
   fetchFromCatalogApi("/smoothies", {
     method: "PUT",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(smoothie)
+    body: smoothie
   });
 
 export default SmoothieDetailView;

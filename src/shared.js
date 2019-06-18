@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const fetchFromCatalogApi = (path, options) => myFetch(`/catalogapi/api${path}`, options);
 export const fetchFromOrderApi = (path, options) => myFetch(`/orderapi/api${path}`, options);
@@ -18,12 +18,20 @@ const myFetch = (path, { body, headers = {}, ...options } = {}) =>
 const isOk = response => (response.ok ? response : Promise.reject(response));
 const toJson = response => response.json();
 
-export const usePromise = (methodThatReturnsAPromise, initialValue) => {
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    methodThatReturnsAPromise().then(setValue);
-  }, [methodThatReturnsAPromise]);
+export const usePromise = (...args) => {
+  const [value] = useRefreshablePromise(...args);
 
   return value;
+};
+
+export const useRefreshablePromise = (methodThatReturnsAPromise, initialValue) => {
+  const [value, setValue] = useState(initialValue);
+
+  const refresh = useCallback(() => methodThatReturnsAPromise().then(setValue), [methodThatReturnsAPromise]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return [value, refresh];
 };

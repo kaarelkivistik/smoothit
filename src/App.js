@@ -2,16 +2,17 @@ import React, { useCallback } from "react";
 import { Switch } from "react-router";
 import { BrowserRouter, NavLink, Route } from "react-router-dom";
 import NewSmoothieView from "./NewSmoothieView";
-import { fetchFromCatalogApi, usePromise } from "./shared";
+import { fetchFromCatalogApi, useRefreshablePromise } from "./shared";
 import SmoothieDetailView from "./SmoothieDetailView";
+import SmoothiesProvider from "./SmoothiesProvider";
 
 const App = () => {
   const getSmoothiesContent = useCallback(() => getSmoothies().then(response => response.content), []);
-  const smoothies = usePromise(getSmoothiesContent, []);
+  const [smoothies, refreshSmoothies] = useRefreshablePromise(getSmoothiesContent, []);
 
   return (
     <BrowserRouter>
-      <>
+      <SmoothiesProvider refreshSmoothies={refreshSmoothies}>
         <ul>
           {smoothies.map(smoothie => (
             <SmoothieListItem key={smoothie.id} smoothie={smoothie} />
@@ -25,7 +26,7 @@ const App = () => {
           <Route path="/smoothies/new" component={NewSmoothieView} />
           <Route path="/smoothies/:smoothieId" component={SmoothieDetailRoute} />
         </Switch>
-      </>
+      </SmoothiesProvider>
     </BrowserRouter>
   );
 };

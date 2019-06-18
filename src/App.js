@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { Switch } from "react-router";
 import { BrowserRouter, NavLink, Route } from "react-router-dom";
 import { fetchFromCatalogApi, usePromise } from "./shared";
 import SmoothieDetailView from "./SmoothieDetailView";
@@ -14,14 +15,14 @@ const App = () => {
           {smoothies.map(smoothie => (
             <SmoothieListItem key={smoothie.id} smoothie={smoothie} />
           ))}
+          <NewSmoothieListItem />
         </ul>
 
         <hr />
 
-        <Route
-          path="/smoothies/:smoothieId"
-          render={props => <SmoothieDetailView smoothieId={Number(props.match.params.smoothieId)} />}
-        />
+        <Switch>
+          <Route path="/smoothies/:smoothieId" component={SmoothieDetailRoute} />
+        </Switch>
       </>
     </BrowserRouter>
   );
@@ -34,5 +35,11 @@ const SmoothieListItem = ({ smoothie }) => (
     <NavLink to={`/smoothies/${smoothie.id}`}>{smoothie.name}</NavLink>
   </li>
 );
+
+const SmoothieDetailRoute = ({ match }) => {
+  const id = Number(match.params.smoothieId);
+
+  return <SmoothieDetailView key={id} smoothieId={id} />;
+};
 
 export default App;

@@ -8,9 +8,15 @@ const SmoothieDetailView = ({ smoothieId }) => {
 
   if (!smoothie) return null;
 
-  return <SmoothieForm defaultValue={smoothie} />;
+  return <SmoothieForm defaultValue={smoothie} onSave={updateSmoothie} />;
 };
 
 const getSmoothie = id => fetchFromCatalogApi(`/smoothies/${id}`);
+const updateSmoothie = smoothie =>
+  fetchFromCatalogApi("/smoothies", {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(smoothie)
+  });
 
 export default SmoothieDetailView;

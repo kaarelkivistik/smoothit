@@ -1,7 +1,13 @@
 import React, { useCallback, useState } from "react";
+import SmoothieComponentForm from "./SmoothieComponentForm";
 
-const SmoothieForm = ({ defaultValue }) => {
+const SmoothieForm = ({ defaultValue, onSave }) => {
   const [value, setValue] = useState(defaultValue);
+
+  const onSubmit = event => {
+    event.preventDefault();
+    onSave(value);
+  };
 
   const onFieldChange = useCallback(
     ({ target: { name, value } }) =>
@@ -12,8 +18,26 @@ const SmoothieForm = ({ defaultValue }) => {
     [setValue]
   );
 
+  const onComponentChange = useCallback(
+    (updater, index) =>
+      setValue(prevState => ({
+        ...prevState,
+        smoothieComponents: updateArrayItem(prevState.smoothieComponents, index, updater)
+      })),
+    []
+  );
+
+  const addComponent = useCallback(
+    () =>
+      setValue(prevState => ({
+        ...prevState,
+        smoothieComponents: [...prevState.smoothieComponents, { $id: prevState.smoothieComponents.length }]
+      })),
+    []
+  );
+
   return (
-    <form>
+    <form onSubmit={onSubmit}>
       <h3>Smoothie details</h3>
 
       <p>
@@ -42,9 +66,23 @@ const SmoothieForm = ({ defaultValue }) => {
 
       <h3>Components</h3>
 
-      <pre>{JSON.stringify(value.smoothieComponents, null, 2)}</pre>
+      {value.smoothieComponents.map((smoothieComponent, index) => (
+        <SmoothieComponentForm
+          key={smoothieComponent.id || smoothieComponent.$id}
+          value={smoothieComponent}
+          onChange={value => onComponentChange(value, index)}
+        />
+      ))}
+
+      <button type="button" onClick={addComponent}>
+        Add a component
+      </button>
+      <button type="submit">Save</button>
     </form>
   );
 };
+
+const updateArrayItem = (array, index, updater) =>
+  array.map((item, $index) => (index === $index ? updater(item) : item));
 
 export default SmoothieForm;

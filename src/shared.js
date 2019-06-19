@@ -16,7 +16,11 @@ const myFetch = (path, { body, headers = {}, ...options } = {}) =>
     .then(toJson);
 
 const isOk = response => (response.ok ? response : Promise.reject(response));
-const toJson = response => response.json();
+const toJson = async response => {
+  try {
+    return await response.json();
+  } catch (e) {}
+};
 
 export const usePromise = (...args) => {
   const [value] = useRefreshablePromise(...args);

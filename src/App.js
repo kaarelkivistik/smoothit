@@ -1,10 +1,10 @@
 import React, { useCallback } from "react";
-import { Switch } from "react-router";
+import { matchPath, Switch, withRouter } from "react-router";
 import { BrowserRouter, NavLink, Route } from "react-router-dom";
 import NewSmoothieView from "./NewSmoothieView";
 import { fetchFromCatalogApi, useRefreshablePromise } from "./shared";
 import SmoothieDetailView from "./SmoothieDetailView";
-import SmoothiesProvider from "./SmoothiesProvider";
+import SmoothiesProvider, { useRefreshSmoothies } from "./SmoothiesProvider";
 
 const App = () => {
   const getSmoothiesContent = useCallback(() => getSmoothies().then(response => response.content), []);
@@ -24,20 +24,42 @@ const App = () => {
 
         <Switch>
           <Route path="/smoothies/new" component={NewSmoothieView} />
-          <Route path="/smoothies/:smoothieId" component={SmoothieDetailRoute} />
+          <Route {...smoothieDetailRouteProps} component={SmoothieDetailRoute} />
         </Switch>
       </SmoothiesProvider>
     </BrowserRouter>
   );
 };
 
+const smoothieDetailRouteProps = { path: "/smoothies/:smoothieId" };
+
 const getSmoothies = () => fetchFromCatalogApi("/smoothies");
 
-const SmoothieListItem = ({ smoothie }) => (
-  <li>
-    <NavLink to={`/smoothies/${smoothie.id}`}>{smoothie.name}</NavLink>
-  </li>
-);
+const SmoothieListItem = withRouter(({ smoothie, location, history }) => {
+  const refresh = useRefreshSmoothies();
+  
+  const deleteThisSmoothie = useCallback(async () => {
+    await deleteSmoothie(smoothie.id);
+    await refresh();
+
+    const match = matchPath(location.pathname, smoothieDetailRouteProps);
+    if (match && smoothie.id === Number(match.params.smoothieId)) history.replace("/");
+  }, [smoothie, location, history, refresh]);
+
+  return (
+    <li>
+      <NavLink to={`/smoothies/${smoothie.id}`}>{smoothie.name}</NavLink>{" "}
+      <button type="button" onClick={deleteThisSmoothie}>
+        delete
+      </button>
+    </li>
+  );
+});
+
+const deleteSmoothie = smoothieId =>
+  fetchFromCatalogApi(`/smoothies/${smoothieId}`, {
+    method: "DELETE"
+  });
 
 const NewSmoothieListItem = () => (
   <li>

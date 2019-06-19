@@ -1,3 +1,4 @@
+import { Box, FormControl, InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
 import React, { useCallback } from "react";
 import { fetchFromCatalogApi, usePromise } from "./shared";
 
@@ -21,11 +22,14 @@ const SmoothieComponentForm = ({ value, onChange }) => {
   );
 
   return (
-    <>
-      <ComponentPicker value={value.component} onChange={onComponentChange} />
-      <Amount value={value.amount} onChange={onAmountChange} />
-      <hr />
-    </>
+    <Box display="flex" flexDirection="row" mb={4}>
+      <Box width={400} mr={2}>
+        <ComponentPicker value={value.component} onChange={onComponentChange} />
+      </Box>
+      <Box>
+        <Amount value={value.amount} onChange={onAmountChange} />
+      </Box>
+    </Box>
   );
 };
 
@@ -38,21 +42,17 @@ const ComponentPicker = ({ value, onChange }) => {
   ]);
 
   return (
-    <p>
-      <label>
-        Component
-        <br />
-        <select value={value && value.id} onChange={onSelectChange}>
-          <option>-- Vali koostiosa --</option>
-          {components.map(component => (
-            <option key={component.id} value={component.id}>
-              {component.name}, {component.brand}, €{component.unitPriceEur.toFixed(2)}/{component.unit},{" "}
-              {component.kcalPerUnit}kcal/{component.unit}
-            </option>
-          ))}
-        </select>
-      </label>
-    </p>
+    <FormControl fullWidth>
+      <InputLabel>Component</InputLabel>
+      <Select value={value ? value.id : ""} onChange={onSelectChange} fullWidth>
+        {components.map(component => (
+          <MenuItem key={component.id} value={component.id}>
+            {component.name}, {component.brand}, €{component.unitPriceEur.toFixed(2)}/{component.unit},{" "}
+            {component.kcalPerUnit}kcal/{component.unit}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
   );
 };
 
@@ -61,13 +61,13 @@ const getComponents = () => fetchFromCatalogApi("/components").then(response => 
 const findById = (array, id) => array.find(item => id === item.id);
 
 const Amount = ({ value, onChange }) => (
-  <p>
-    <label>
-      Amount
-      <br />
-      <input type="number" value={typeof value === "number" ? value : 0} onChange={onChange} />
-    </label>
-  </p>
+  <TextField
+    label="Amount"
+    name="amount"
+    type="number"
+    value={typeof value === "number" ? value : 0}
+    onChange={onChange}
+  />
 );
 
 export default SmoothieComponentForm;

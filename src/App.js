@@ -1,10 +1,12 @@
-import React, { useCallback } from "react";
-import { matchPath, Switch, withRouter } from "react-router";
+import { Box, Button, Container, makeStyles } from "@material-ui/core";
+import React, { forwardRef, useCallback } from "react";
+import { Switch } from "react-router";
 import { BrowserRouter, NavLink, Route } from "react-router-dom";
+import logo from "./assets/smoothit.png";
 import NewSmoothieView from "./NewSmoothieView";
 import { fetchFromCatalogApi, useRefreshablePromise } from "./shared";
 import SmoothieDetailView from "./SmoothieDetailView";
-import SmoothiesProvider, { useRefreshSmoothies } from "./SmoothiesProvider";
+import SmoothiesProvider from "./SmoothiesProvider";
 
 const App = () => {
   const getSmoothiesContent = useCallback(() => getSmoothies().then(response => response.content), []);
@@ -13,19 +15,17 @@ const App = () => {
   return (
     <BrowserRouter>
       <SmoothiesProvider refreshSmoothies={refreshSmoothies}>
-        <ul>
-          {smoothies.map(smoothie => (
-            <SmoothieListItem key={smoothie.id} smoothie={smoothie} />
-          ))}
-          <NewSmoothieListItem />
-        </ul>
+        <Container>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <img src={logo} alt="SmoothIT" />
+            <SmoothiesList smoothies={smoothies} />
+          </Box>
 
-        <hr />
-
-        <Switch>
-          <Route path="/smoothies/new" component={NewSmoothieView} />
-          <Route {...smoothieDetailRouteProps} component={SmoothieDetailRoute} />
-        </Switch>
+          <Switch>
+            <Route {...smoothieDetailRouteProps} component={SmoothieDetailRoute} />
+            <NewSmoothieView />
+          </Switch>
+        </Container>
       </SmoothiesProvider>
     </BrowserRouter>
   );
@@ -35,44 +35,54 @@ const smoothieDetailRouteProps = { path: "/smoothies/:smoothieId" };
 
 const getSmoothies = () => fetchFromCatalogApi("/smoothies");
 
-const SmoothieListItem = withRouter(({ smoothie, location, history }) => {
-  const refresh = useRefreshSmoothies();
-  
-  const deleteThisSmoothie = useCallback(async () => {
-    await deleteSmoothie(smoothie.id);
-    await refresh();
-
-    const match = matchPath(location.pathname, smoothieDetailRouteProps);
-    if (match && smoothie.id === Number(match.params.smoothieId)) history.replace("/");
-  }, [smoothie, location, history, refresh]);
-
-  return (
-    <li>
-      <NavLink to={`/smoothies/${smoothie.id}`}>{smoothie.name}</NavLink>{" "}
-      <button type="button" onClick={deleteThisSmoothie}>
-        delete
-      </button>
-    </li>
-  );
+const useStyles = makeStyles({
+  root: {
+    display: "flex",
+    flexWrap: "wrap",
+    listStyle: "none",
+    padding: 0,
+    margin: 0,
+    "& li": {
+      marginRight: "1rem"
+    }
+  }
 });
 
-const deleteSmoothie = smoothieId =>
-  fetchFromCatalogApi(`/smoothies/${smoothieId}`, {
-    method: "DELETE"
-  });
+const SmoothiesList = ({ smoothies }) => {
+  const classes = useStyles();
 
-const NewSmoothieListItem = () => (
+  return (
+    <ul className={classes.root}>
+      {smoothies.map(smoothie => (
+        <SmoothieListItem key={smoothie.id} smoothie={smoothie} />
+      ))}
+      <NewSmoothieListItem />
+    </ul>
+  );
+};
+
+const SmoothieListItem = ({ smoothie }) => (
   <li>
-    <NavLink to="/smoothies/new">
-      <i>Create a smoothie</i>
-    </NavLink>
+    <Button color="secondary" component={Link} to={`/smoothies/${smoothie.id}`}>
+      {smoothie.name}
+    </Button>
   </li>
 );
 
-const SmoothieDetailRoute = ({ match }) => {
-  const id = Number(match.params.smoothieId);
+const NewSmoothieListItem = () => (
+  <li>
+    <Button color="primary" variant="contained" component={Link} to="/">
+      Create a smoothie
+    </Button>
+  </li>
+);
 
-  return <SmoothieDetailView key={id} smoothieId={id} />;
+const Link = forwardRef((props, ref) => <NavLink innerRef={ref} {...props} />);
+
+const SmoothieDetailRoute = props => {
+  const id = Number(props.match.params.smoothieId);
+
+  return <SmoothieDetailView key={id} {...props} smoothieId={id} />;
 };
 
 export default App;

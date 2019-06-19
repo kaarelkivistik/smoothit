@@ -1,7 +1,8 @@
+import { Box, Button, TextField, Typography } from "@material-ui/core";
 import React, { useCallback, useState } from "react";
 import SmoothieComponentForm from "./SmoothieComponentForm";
 
-const SmoothieForm = ({ defaultValue, onSave }) => {
+const SmoothieForm = ({ defaultValue, onSave, onDelete }) => {
   const [value, setValue] = useState(defaultValue);
 
   const onSubmit = event => {
@@ -38,33 +39,32 @@ const SmoothieForm = ({ defaultValue, onSave }) => {
 
   return (
     <form onSubmit={onSubmit}>
-      <h3>Smoothie details</h3>
+      <Typography variant="h4" gutterBottom>
+        Smoothie details
+      </Typography>
 
-      <p>
-        <label>
-          Name
-          <br />
-          <input name="name" value={value.name} onChange={onFieldChange} />
-        </label>
-      </p>
+      <Box display="flex" flexDirection="column" mb={2}>
+        <TextField label="Name" name="name" value={value.name} onChange={onFieldChange} margin="normal" />
+        <TextField
+          label="Description"
+          name="description"
+          value={value.description}
+          onChange={onFieldChange}
+          margin="normal"
+        />
+        <TextField
+          label="Instructions"
+          name="instructions"
+          value={value.instructions}
+          onChange={onFieldChange}
+          margin="normal"
+          multiline
+        />
+      </Box>
 
-      <p>
-        <label>
-          Description
-          <br />
-          <input name="description" value={value.description} onChange={onFieldChange} />
-        </label>
-      </p>
-
-      <p>
-        <label>
-          Instructions
-          <br />
-          <textarea name="instructions" value={value.instructions} onChange={onFieldChange} />
-        </label>
-      </p>
-
-      <h3>Components</h3>
+      <Typography variant="h4" gutterBottom>
+        Components
+      </Typography>
 
       {value.smoothieComponents.map((smoothieComponent, index) => (
         <SmoothieComponentForm
@@ -74,10 +74,25 @@ const SmoothieForm = ({ defaultValue, onSave }) => {
         />
       ))}
 
-      <button type="button" onClick={addComponent}>
-        Add a component
-      </button>
-      <button type="submit">Save</button>
+      <Box display="flex">
+        <Box mr={2}>
+          <Button type="button" onClick={addComponent}>
+            Add a component
+          </Button>
+        </Box>
+        {onDelete && (
+          <Box mr={2}>
+            <Button type="button" variant="contained" color="secondary" onClick={onDelete}>
+              Delete smoothie
+            </Button>
+          </Box>
+        )}
+        <Box>
+          <Button type="submit" variant="contained" color="primary">
+            Save smoothie
+          </Button>
+        </Box>
+      </Box>
     </form>
   );
 };
